@@ -1,66 +1,80 @@
-Separate Chaining in hashing
- 
-#include<stdio.h>
-#include<stdlib.h>
-#define SIZE 10
-struct node {
-      int data;
-      struct node *next;
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct Book {
+    int id;
+    char name[50], author[50];
+    int available;
+    struct Book* next;
 };
-struct node *head[SIZE]={NULL};
-void insert(int k){
-      int hk=k%SIZE;
-      struct node *newnode;
-      newnode=(struct node *)malloc(sizeof(struct node));
-      newnode->data=k;
-      newnode->next=head[hk];
-      head[hk]=newnode;
+
+struct Book* head = NULL;
+
+struct Book* findBook(int id) {
+    struct Book* b = head;
+    while (b && b->id != id) b = b->next;
+    return b;
 }
-void display(){
-      int i;
-      for(i=0;i<SIZE;i++)
-      {
-            struct node *t=head[i];
-            printf("head[%d]->",i);
-            while(t!=NULL){
-                  printf("%d-->",t->data);
-                  t=t->next;
-            }
-            printf("NULL\n");
-      }
+
+void addBook() {
+    struct Book* b = (struct Book*)malloc(sizeof(struct Book));
+    printf("ID: "); scanf("%d", &b->id);
+    printf("Name (one word): "); scanf("%s", b->name);
+    printf("Author (one word): "); scanf("%s", b->author);
+    printf("Available (1/0): "); scanf("%d", &b->available);
+    b->next = head;
+    head = b;
 }
-void search(int skey){
-      int hk=skey%SIZE;
-      struct node *t=head[hk];
-      while(t!=NULL){
-            if(t->data==skey){
-                  printf("key found\n");
-                  break;
-            }
-            t=t->next;
-      }
-      if(t==NULL)
-       printf("key not found");
+
+void updateBook() {
+    int id;
+    printf("Enter ID to update: "); scanf("%d", &id);
+    struct Book* b = findBook(id);
+    if (b) {
+        printf("New Name (one word): "); scanf("%s", b->name);
+        printf("New Author (one word): "); scanf("%s", b->author);
+        printf("Available (1/0): "); scanf("%d", &b->available);
+    } else {
+        printf("Book not found.\n");
+    }
 }
-int main(){
-      int i,k,op;
-      while(1){
-            printf("1.insert 2.display 3.search othersExit\n");
-            scanf("%d",&op);
-            switch(op){
-                  case 1:
-                        scanf("%d",&k);
-                        insert(k);
-                        break;
-                  case 2:
-                        display();
-                        break;
-                  case 3:
-                     scanf("%d",&k);      
-                     search(k);
-                     break;
-                  default:
-                        exit(0);
-            }
-      } 
+
+void deleteBook() {
+    int id;
+    printf("Enter ID to delete: "); scanf("%d", &id);
+    struct Book *b = head, *prev = NULL;
+    while (b && b->id != id) { prev = b; b = b->next; }
+    if (!b) printf("Book not found.\n");
+    else {
+        if (prev) prev->next = b->next;
+        else head = b->next;
+        free(b);
+        printf("Book deleted.\n");
+    }
+}
+
+void listBooks() {
+    struct Book* b = head;
+    if (!b) { printf("No books.\n"); return; }
+    while (b) {
+        printf("ID: %d, Name: %s, Author: %s, Available: %s\n",
+            b->id, b->name, b->author, b->available ? "Yes" : "No");
+        b = b->next;
+    }
+}
+
+int main() {
+    int ch;
+    do {
+        printf("\n1.Add 2.Update 3.Delete 4.List 0.Exit: ");
+        scanf("%d", &ch);
+        switch (ch) {
+            case 1: addBook(); break;
+            case 2: updateBook(); break;
+            case 3: deleteBook(); break;
+            case 4: listBooks(); break;
+        }
+    } while (ch != 0);
+    return 0;
 }
